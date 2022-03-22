@@ -6,4 +6,4 @@ npm run build
 
 after that
 
-open `index.html`
+open `build/index.html`
