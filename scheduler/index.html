@@ -15,24 +15,11 @@
 <script src="scheduler.js"></script>
 <script>
 
-    async function notify(completed) {
-        try {
-            await Notification.requestPermission();
-            if (Notification.permission !== 'granted') {
-                new Notification(`Recipe ${completed.name} completed.`, {
-                    vibrate: [200, 100, 300]
-                });
-            }
-        } catch (e) {
-            console.error('Notification failed', e);
-        }
-    }
-
     const scheduler = new Scheduler(completed => {
         console.log('Recipe completed.', completed);
         let el = find(completed.name);
         if (el) dyeBackground(el, 'green');
-        notify(completed);
+        // notify(completed); todo notify
     });
 
     const list = document.getElementById('list');
