@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<button onclick="add()">Add</button>
+
+<ol id="list">
+    <li>Items to craft</li>
+</ol>
+
+<script src="scheduler.js"></script>
+<script>
+
+    async function notify(completed) {
+        try {
+            await Notification.requestPermission();
+            if (Notification.permission !== 'granted') {
+                new Notification(`Recipe ${completed.name} completed.`, {
+                    vibrate: [200, 100, 300]
+                });
+            }
+        } catch (e) {
+            console.error('Notification failed', e);
+        }
+    }
+
+    const scheduler = new Scheduler(completed => {
+        console.log('Recipe completed.', completed);
+        let el = find(completed.name);
+        if (el) dyeBackground(el, 'green');
+        notify(completed);
+    });
+
+    const list = document.getElementById('list');
+
+    function add() {
+        const recipe = {
+            time: randomInt(1000, 30000),
+            name: randomString(8)
+        };
+        scheduler.add(recipe);
+        list.appendChild(createLiEl(recipe.name, recipe.time));
+    }
+
+    function createLiEl(name, time) {
+        const el = document.createElement('li');
+        el.id = name;
+        el.innerText = `Recipe ${name}.\nRequired time ${(time / 1000).toFixed(2)} seconds.`;
+        return el;
+    }
+
+    function find(id) {
+        return document.getElementById(id);
+    }
+
+    function dyeBackground(el, color) {
+        el.style.backgroundColor = color;
+    }
+
+    function randomString(length) {
+        let result = '';
+        const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        const charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
+    function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    (function loadOldData() {
+        let oldData = window.localStorage.getItem('scheduler_orders');
+        if (oldData) {
+            JSON.parse(oldData).forEach(e => {
+                list.appendChild(createLiEl(e.recipe.name, e.recipe.time));
+            });
+        }
+    })();
+
+</script>
+</body>
+</html>
